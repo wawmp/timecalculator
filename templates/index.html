@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>エンジン使用時間計算ツール</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .buttons button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>エンジン使用時間計算ツール</h1>
+        <div class="input-group">
+            <label for="time1">時間1 (例: 1:30)</label>
+            <input type="text" id="time1" placeholder="時:分">
+        </div>
+        <div class="input-group">
+            <label for="time2">時間2 (例: 2:45)</label>
+            <input type="text" id="time2" placeholder="時:分">
+        </div>
+        <div class="buttons">
+            <button onclick="calculate('+')">+</button>
+            <button onclick="calculate('-')">-</button>
+            <button onclick="calculate('*')">×</button>
+            <button onclick="calculate('/')">÷</button>
+        </div>
+        <div id="result" class="result"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        async function calculate(operation) {
+            const time1 = document.getElementById('time1').value;
+            const time2 = document.getElementById('time2').value;
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        operation: operation,
+                        time1: time1,
+                        time2: time2
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.textContent = `結果: ${data.result}`;
+                    errorDiv.textContent = '';
+                } else {
+                    errorDiv.textContent = data.error;
+                    resultDiv.textContent = '';
+                }
+            } catch (error) {
+                errorDiv.textContent = '計算中にエラーが発生しました';
+                resultDiv.textContent = '';
+            }
+        }
+    </script>
+</body>
+</html>
